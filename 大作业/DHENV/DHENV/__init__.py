@@ -6,6 +6,6 @@ register(
 )
 
 register(
-    id='DHENV-v0',
-    entry_point='DHENV.envs:GBM_simple',
+    id='DHENV-v1',
+    entry_point='DHENV.envs:GBM_simple_PL_cdf',
 )
