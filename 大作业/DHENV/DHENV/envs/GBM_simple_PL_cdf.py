@@ -41,10 +41,12 @@ class GBM_simple_PL(gym.Env):
         self.rewards = []
 
         self.saving = 0
-        self.savings = [0]
+        self.savings = [0]  # 我认为第一个元素应该是c，因为此时你卖了一份期权，收到了那么多钱。
+        # 如果认为agent会考虑money account，它最初面临的就是这么多钱
 
         self.stock_number = 0
-        self.stock_numbers = [0]
+        self.stock_numbers = [0]  # 我认为不应该先放一个零进去，应该让该表的长度与action、reward表相同，毕竟调仓(action)和选择持有的仓位其实是一回事
+        # 如果后续需要打印本表或者作图，与action、reward表长度相同也是方便对应的，长度都为T。
 
         c = self.bscall()
         p = self.bsput()
@@ -52,7 +54,7 @@ class GBM_simple_PL(gym.Env):
         self.callprices = [c]
         self.putprices = [p]
 
-        self.Account = - c[0] + self.stock_number * self.S + self.saving
+        self.Account = - c[0] + self.stock_number * self.S + self.saving # 最好认为初始值为0，即-c+c，这个影响不大
         self.Accounts = [self.Account]
 
         self.seednumber = self.seed()
@@ -95,6 +97,7 @@ class GBM_simple_PL(gym.Env):
     def GBMmove(self):
         voltility = np.random.randn(1)[0] * math.sqrt(self.deltat)
         self.S = self.S + voltility * self.std + self.mean * self.deltat
+        # 此处并非几何布朗运动
 
 
     def step(self, action):
@@ -104,7 +107,7 @@ class GBM_simple_PL(gym.Env):
         self.GBMmove()
         self.maturity -= self.deltat
 
-        self.saving *= math.exp(-self.riskfree * self.deltat)#从上一阶段到这一阶段的增长
+        self.saving *= math.exp(-self.riskfree * self.deltat)  # 指数上不应该有负号！！！存银行里的钱怎么能变少
         self.saving -= stock_money
         self.saving -= abs(stock_money) * self.transac#减少transac
         self.savings.append(self.saving)
@@ -121,6 +124,9 @@ class GBM_simple_PL(gym.Env):
 
         self.reward = ( -self.callprices[-1][0] - (-self.callprices[-2][0]) ) + (self.prices[-1] - self.prices[-2]) * self.stock_numbers[-2] - abs(stock_money) * self.transac
         self.rewards.append(self.reward)
+        # 如同讨论的那样，应该为stock_numnbers[-1]
+        # 另外我认为应该加入money account的改变量，文献中没有这一项，因为它认为无风险利率为0，
+        # 应该奖励股市不利的时候将钱存在银行的行为。
 
         done = False
         if self.maturity == 0:
@@ -131,10 +137,16 @@ class GBM_simple_PL(gym.Env):
         self.actions.append(action)
         self.construct_state()
 
+        # 文献里说，最后一步必须是出手所有股票，所以reward也需要特殊设置。
+
         return self.state, self.reward, done, {}
     
     def construct_state(self):
         self.state = self.state = np.array([self.stock_number, self.saving, self.S, self.maturity], dtype=np.float32)
+        # 不太了解这里的语法qwq
+        # 这里有个问题，返回的state应该是下一次action的依据，
+        # 而这里的self.saving只是一次action之后的结果，和下次行动时面临的saving差利息
+        # 觉得你saving更新的位置有点问题
 
     def show(self):
         plt.plot(self.prices, label = 'prices')
@@ -152,6 +164,8 @@ class GBM_simple_PL(gym.Env):
 
     def reset(self):
 
+        # 这里没有维护Accounts
+
         self.maturity = self.maturity_const
 
         self.S = self.S_const
@@ -161,10 +175,12 @@ class GBM_simple_PL(gym.Env):
         self.rewards = []
 
         self.saving = 0
-        self.savings = [0]
+        self.savings = [0]  # 我认为第一个元素应该是c，因为此时你卖了一份期权，收到了那么多钱。
+        # 如果认为agent会考虑money account，它最初面临的就是这么多钱
 
         self.stock_number = 0
-        self.stock_numbers = [0]
+        self.stock_numbers = [0]  # 我认为不应该先放一个零进去，应该让该表的长度与action、reward表相同，毕竟调仓(action)和选择持有的仓位其实是一回事
+        # 如果后续需要打印本表或者作图，与action、reward表长度相同也是方便对应的，长度都为T。
 
         c = self.bscall()
         p = self.bsput()
@@ -173,7 +189,7 @@ class GBM_simple_PL(gym.Env):
         self.putprices = [p]
 
         self.PLs = [c[0]]
-        self.PL = c[0]
+        self.PL = c[0]  # 作为reward，保持和actions长度相同就好，不要先放元素进去
         
         self.actions = []
 
