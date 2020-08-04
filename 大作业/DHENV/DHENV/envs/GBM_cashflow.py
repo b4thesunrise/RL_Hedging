@@ -35,8 +35,8 @@ class GBM_cashflow(gym.Env):
         c = self.bscall()
         p = self.bsput()
 
-        self.money_account = c
-        self.money_accounts = [c]
+        self.money_account = c[0]
+        self.money_accounts = [c[0]]
 
         self.position = 0
         self.positions = []
@@ -113,9 +113,12 @@ class GBM_cashflow(gym.Env):
         self.balance = -self.callprices[-1][0] + self.money_accounts[-1] + self.prices[-1] * self.positions[-1]
         self.balances.append(self.balance)
 
-        # self.reward = (-self.callprices[-1][0] - (-self.callprices[-2][0])) + (self.prices[-1] - self.prices[-2]) * \
-        #               self.positions[-2] - abs(stock_money) * self.transac
-        # self.rewards.append(self.reward)
+        if self.time_to_maturity != 0:
+            final_stock = self.prices[-1] * self.positions[-1]
+            final_money = self.money_accounts[-1] + final_stock - abs(final_stock) * self.transac - self.callprices[-1][0]
+            self.reward = final_money - self.money_accounts[-2]
+        else:
+            pass
 
         done = False
         if self.time_to_maturity == 0:
@@ -158,8 +161,8 @@ class GBM_cashflow(gym.Env):
         c = self.bscall()
         p = self.bsput()
 
-        self.money_account = c
-        self.money_accounts = [c]
+        self.money_account = c[0]
+        self.money_accounts = [c[0]]
 
         self.balance = 0
         self.balances = [0]
@@ -169,9 +172,6 @@ class GBM_cashflow(gym.Env):
 
         self.callprices = [c]
         self.putprices = [p]
-
-        self.PLs = []
-        self.PL = 0
 
         self.actions = []
 
