@@ -95,7 +95,7 @@ class GBM_simple_PL(gym.Env):
 
 
     def GBMmove(self):
-        voltility = np.random.randn(1)[0] * math.sqrt(self.deltat)
+        dW = np.random.randn(1)[0] * math.sqrt(self.deltat)
         self.S = self.S + self.S * (dW * self.std + self.mean * self.deltat)
         # 此处并非几何布朗运动
 
@@ -134,7 +134,7 @@ class GBM_simple_PL(gym.Env):
             if self.count % 100 == 1:
                 self.show()
         if done:
-            self.reward += self.stocknumber * self.S#在最后一步的时候卖掉所有股票
+            self.reward += (-self.transac * self.stock_number * self.S)#在最后一步的时候卖掉所有股票
         self.rewards.append(self.reward)
         self.construct_state()
         
