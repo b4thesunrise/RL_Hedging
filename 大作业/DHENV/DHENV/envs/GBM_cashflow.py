@@ -51,7 +51,7 @@ class GBM_cashflow(gym.Env):
 
         self.actions = []
 
-        self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)#需要修改action的限制，不然没办法训练
         self.state_space = spaces.Box(low=-np.inf, high=np.inf, shape=(4,),
                                       dtype=np.float32)  # asset: stock, bank, stockprice, maturity
 
@@ -115,13 +115,13 @@ class GBM_cashflow(gym.Env):
 
         if self.time_to_maturity != 0:
             final_stock = self.prices[-1] * self.positions[-1]
-            final_money = self.money_accounts[-1] + final_stock - abs(final_stock) * self.transac - self.callprices[-1][0]
+            final_money = self.money_accounts[-1] + final_stock - abs(final_stock) * self.transac - self.callprices[-1][0]#如果transac上面考虑过的话，这里应该不用考虑？另外callprices应该也不用考虑，我觉得reward改成 账户里在i+1时刻的钱 + 股票在i+1时刻的价值 - 账户在i时刻的钱 - 账户在i时刻的价值 比较合适
             self.reward = final_money - self.money_accounts[-2]
         else:
             pass
 
         done = False
-        if self.time_to_maturity == 0:
+        if self.time_to_maturity == 0:#这块不能用0判定，实验的时候发现可能是极小的数字，建议改成 < 1e-15
             done = True
             self.count += 1
             if self.count % 100 == 1:
