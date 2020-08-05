@@ -89,8 +89,8 @@ class GBM_cashflow(gym.Env):
         return p, delta, Gam
 
     def GBMmove(self):
-        dW = np.random.randn(1)[0] * math.sqrt(self.deltat)
-        self.S = self.S + self.S * (dW * self.std + self.mean * self.deltat)
+        dlogS = np.random.randn(1)[0] * math.sqrt(self.deltat) * self.std + (self.mean - 0.5*self.std**2) * self.deltat
+        self.S = np.exp(np.log(self.S) + dlogS)
 
     def step(self, action):
         stock_add = action
