@@ -61,7 +61,7 @@ class GBM_simple_PL(gym.Env):
 
         self.actions = []
 
-        self.action_space = spaces.Box(low = -np.inf, high = np.inf, shape = (1,), dtype=np.float32)
+        self.action_space = spaces.Box(low = -2, high = 2, shape = (1,), dtype=np.float32)
         self.observation_space = spaces.Box(low = -np.inf, high = np.inf, shape = (4,),dtype=np.float32)#asset: stock, bank, stockprice, maturity
     
     def bscall(self):
