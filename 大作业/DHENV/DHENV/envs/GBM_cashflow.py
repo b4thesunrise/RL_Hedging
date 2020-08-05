@@ -39,7 +39,7 @@ class GBM_cashflow(gym.Env):
         self.money_accounts = [c[0]]
 
         self.position = 0
-        self.positions = []
+        self.positions = [0]
 
         self.callprices = [c]
         self.putprices = [p]
@@ -51,7 +51,7 @@ class GBM_cashflow(gym.Env):
 
         self.actions = []
 
-        self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-10, high=10, shape=(1,), dtype=np.float32)
         self.state_space = spaces.Box(low=-np.inf, high=np.inf, shape=(4,),
                                       dtype=np.float32)  # asset: stock, bank, stockprice, maturity
 
@@ -113,12 +113,12 @@ class GBM_cashflow(gym.Env):
         self.balance = -self.callprices[-1][0] + self.money_accounts[-1] + self.prices[-1] * self.positions[-1]
         self.balances.append(self.balance)
 
-        if self.time_to_maturity != 0:
+        if self.time_to_maturity < 1e-8:
             final_stock = self.prices[-1] * self.positions[-1]
             final_money = self.money_accounts[-1] + final_stock - abs(final_stock) * self.transac - self.callprices[-1][0]
             self.reward = final_money - self.money_accounts[-2]
         else:
-            pass
+            self.reward = self.money_accounts[-1] - self.money_accounts[-2]
 
         done = False
         if self.time_to_maturity == 0:
