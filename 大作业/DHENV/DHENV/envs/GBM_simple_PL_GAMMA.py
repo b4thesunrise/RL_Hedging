@@ -19,7 +19,7 @@ from gym.utils import seeding
 # 6. 打印的要修改，修改show
 # 7. env.actions 没有reset，修改reset
 
-class GBM_simple_PL_cdf(gym.Env):
+class GBM_simple_PL_GAMMA(gym.Env):
     
     def __init__(self, std = 0.3, mean = 0.2, T = 10, S = 10, strike = 8, riskfree = 0.04, dividen = 0, deltat = 0.01, transac = 0.01):
         self.std = std
@@ -102,7 +102,7 @@ class GBM_simple_PL_cdf(gym.Env):
 
     def step(self, action):
         #i时刻，决定买多少，付钱，得到股票
-        stock_add = action
+        stock_add = self.callprices[-1][2]
         self.actions.append(action)
         stock_money = stock_add * self.S
         self.saving -= stock_money
@@ -150,10 +150,6 @@ class GBM_simple_PL_cdf(gym.Env):
         # 觉得你saving更新的位置有点问题
 
     def show(self):
-        plt.plot(self.prices, label = 'prices')
-        plt.show()
-        plt.plot(self.actions, label = 'actions')
-        plt.show()
         plt.plot(self.rewards, label = 'rewards')
         plt.show()
         plt.plot(self.Accounts, label = 'Accounts')

@@ -53,8 +53,7 @@ class GBM_cashflow(gym.Env):
         self.action_space = spaces.Box(low=-10, high=10, shape=(1,),
                                        dtype=np.float32)
 
-        self.state_space = spaces.Box(low=-np.inf, high=np.inf, shape=(4,),
-                                      dtype=np.float32)  # asset: stock, bank, stockprice, maturity
+        self.observation_space = spaces.Box(low = -np.inf, high = np.inf, shape = (4,),dtype=np.float32)#asset: stock, bank, stockprice, maturity
 
     def bscall(self):
         '''
@@ -125,7 +124,7 @@ class GBM_cashflow(gym.Env):
         if self.time_to_maturity < 1e-15:
             done = True
             self.count += 1
-            if self.count % 100 == 1:
+            if self.count % 1000 == 1:
                 self.show()
         self.actions.append(action)
         self.construct_state()
@@ -140,9 +139,7 @@ class GBM_cashflow(gym.Env):
         plt.show()
         plt.plot(self.actions, label='actions')
         plt.show()
-        plt.plot(self.rewards, label='rewards')
-        plt.show()
-        plt.plot(self.balance, label='Accounts')
+        plt.plot(self.balances, label='Accounts')
         plt.show()
 
     def seed(self, seed=None):
