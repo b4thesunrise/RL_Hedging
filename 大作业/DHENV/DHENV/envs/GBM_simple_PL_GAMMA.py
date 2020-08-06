@@ -21,7 +21,7 @@ from gym.utils import seeding
 
 class GBM_simple_PL_GAMMA(gym.Env):
     
-    def __init__(self, std = 0.3, mean = 0.2, T = 10, S = 10, strike = 8, riskfree = 0.04, dividen = 0, deltat = 0.01, transac = 0.01):
+    def __init__(self, std = 0.3, mean = 0.2, T = 100, S = 10, strike = 8, riskfree = 0.01, dividen = 0, deltat = 0.001, transac = 0.01):
         self.std = std
         self.mean = mean
         self.maturity = T * deltat
@@ -61,7 +61,7 @@ class GBM_simple_PL_GAMMA(gym.Env):
 
         self.actions = []
 
-        self.action_space = spaces.Box(low = -2, high = 2, shape = (1,), dtype=np.float32)
+        self.action_space = spaces.Box(low = -np.inf, high = np.inf, shape = (1,), dtype=np.float32)
         self.observation_space = spaces.Box(low = -np.inf, high = np.inf, shape = (4,),dtype=np.float32)#asset: stock, bank, stockprice, maturity
     
     def bscall(self):
@@ -102,8 +102,11 @@ class GBM_simple_PL_GAMMA(gym.Env):
 
     def step(self, action):
         #i时刻，决定买多少，付钱，得到股票
-        stock_add = self.callprices[-1][2]
-        self.actions.append(action)
+        if len(self.callprices) == 1:
+            stock_add = self.callprices[-1][2]
+        else:
+            stock_add = self.callprices[-1][2] - self.callprices[-2][2]
+        self.actions.append(stock_add)
         stock_money = stock_add * self.S
         self.saving -= stock_money
         self.saving -= abs(stock_money) * self.transac#减少transac
@@ -112,6 +115,7 @@ class GBM_simple_PL_GAMMA(gym.Env):
         #i到i+1时刻，股票走动，利息滚动，时间减少
         self.GBMmove()
         self.maturity -= self.deltat
+        self.maturity = max(self.maturity, 1e-15)
         saving_reward = self.saving * (math.exp(self.riskfree * self.deltat) - 1)
         self.saving += saving_reward  # 指数上不应该有负号！！！存银行里的钱怎么能变少
         self.savings.append(self.saving)
@@ -131,7 +135,7 @@ class GBM_simple_PL_GAMMA(gym.Env):
         if self.maturity <= 1e-15:
             done = True
             self.count += 1
-            if self.count % 1000 == 1:
+            if self.count % 100 == 1:
                 self.show()
         if done:
             self.reward += (-self.transac * self.stock_number * self.S)#在最后一步的时候卖掉所有股票
@@ -150,7 +154,7 @@ class GBM_simple_PL_GAMMA(gym.Env):
         # 觉得你saving更新的位置有点问题
 
     def show(self):
-        plt.plot(self.rewards, label = 'rewards')
+        plt.plot(self.actions, label = 'rewards')
         plt.show()
         plt.plot(self.Accounts, label = 'Accounts')
         plt.show()
