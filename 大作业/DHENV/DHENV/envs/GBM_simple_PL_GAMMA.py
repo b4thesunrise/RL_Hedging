@@ -135,8 +135,9 @@ class GBM_simple_PL_GAMMA(gym.Env):
         if self.maturity <= 1e-15:
             done = True
             self.count += 1
-            if self.count % 100 == 1:
-                self.show()
+            if self.count % 10 == 1:
+                #self.show()
+                pass
         if done:
             self.reward += (-self.transac * self.stock_number * self.S)#在最后一步的时候卖掉所有股票
         self.rewards.append(self.reward)

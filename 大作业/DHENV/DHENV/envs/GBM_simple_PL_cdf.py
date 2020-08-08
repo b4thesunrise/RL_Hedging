@@ -61,7 +61,7 @@ class GBM_simple_PL_cdf(gym.Env):
 
         self.actions = []
 
-        self.action_space = spaces.Box(low = -np.inf, high = np.inf, shape = (1,), dtype=np.float32)
+        self.action_space = spaces.Box(low = -1, high = 1, shape = (1,), dtype=np.float32)
         self.observation_space = spaces.Box(low = -np.inf, high = np.inf, shape = (4,),dtype=np.float32)#asset: stock, bank, stockprice, maturity
     
     def bscall(self):
@@ -103,6 +103,7 @@ class GBM_simple_PL_cdf(gym.Env):
     def step(self, action):
         #i时刻，决定买多少，付钱，得到股票
         stock_add = action
+        #stock_add = max(-1e5, min(stock_add, 1e5))
         self.actions.append(action)
         stock_money = stock_add * self.S
         self.saving -= stock_money
@@ -133,7 +134,8 @@ class GBM_simple_PL_cdf(gym.Env):
             done = True
             self.count += 1
             if self.count % 100 == 1:
-                self.show()
+                #self.show()
+                pass
         if done:
             self.reward += (-self.transac * self.stock_number * self.S)#在最后一步的时候卖掉所有股票
         self.rewards.append(self.reward)
